@@ -61,7 +61,6 @@ Df <- as.tibble(snod_bykey_temp) %>% filter(is.na(namecode)) %>%
 
 namecodes <- bind_rows(namecodes, Df)
 
-rm(snod_bykey_temp, Df)
 
 # and merge in
 
@@ -82,4 +81,41 @@ snod_bykey <- merge(snod_bykey, by_image, by = 'image', all.x = T, all.y = F) %>
 
 snod_bykey %<>% select(-EVENT_TYPE)
 
-rm(by_image, namecodes)
+
+# ----
+# add in ngraph frequencies
+
+freq_letter <- read_delim("../SnodWrite_EN/BNC_letters.txt",
+                       "\t", escape_double = FALSE, trim_ws = F, col_names = FALSE)
+names(freq_letter) = c('KE_KEY','letter_frq','letter_cv')
+
+freq_dig <- read_delim("../SnodWrite_EN/BNC_digs.txt",
+                       "\t", escape_double = FALSE, trim_ws = F, col_names = FALSE)
+names(freq_dig) = c('dig','dig_frq','dig_cv')
+
+freq_trig <- read_delim("../SnodWrite_EN/BNC_trigs.txt",
+                       "\t", escape_double = FALSE, trim_ws = F, col_names = FALSE)
+names(freq_trig) = c('trig','trig_frq','trig_cv')
+
+snod_bykey %<>% 
+  mutate(k1 = lead(KE_KEY,1),
+         k2 = lead(KE_KEY,2),
+         dig = paste0(KE_KEY,k1),
+         trig = paste0(dig,k2)) %>% 
+  left_join(freq_letter, by = 'KE_KEY') %>% 
+  left_join(freq_dig, by = 'dig') %>% 
+  left_join(freq_trig, by = 'trig') %>% 
+  select(-k1,-k2, -dig, -trig)
+
+
+# ---- 
+# cleanup and save
+
+rm(list=Filter(function(x) {c("data.frame") %in% class(get(x)) & 
+                            !(x %in% c("snod_bykey"))}, ls()))
+
+save(snod_bykey,file = "./data_local/snod_EN_keydata_2.Rdata")
+
+
+
+
