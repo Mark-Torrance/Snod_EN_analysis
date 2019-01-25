@@ -1,1 +1,1 @@
-Further analysis of English written naming data from the Multilanguage Written Naming Dataset described [here](https://doi.org/10.3758/s13428-017-0902-x)
+Further analysis of English written naming data from the Multilanguage Written Naming Dataset described [here](https://doi.org/10.3758/s13428-017-0902-x).
