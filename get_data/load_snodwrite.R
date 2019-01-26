@@ -98,14 +98,15 @@ freq_trig <- read_delim("../SnodWrite_EN/BNC_trigs.txt",
 names(freq_trig) = c('trig','trig_frq','trig_cv')
 
 snod_bykey %<>% 
+  group_by(subno,image) %>% 
   mutate(k1 = lead(KE_KEY,1),
          k2 = lead(KE_KEY,2),
-         dig = paste0(KE_KEY,k1),
-         trig = paste0(dig,k2)) %>% 
+         dig = ifelse(!is.na(k1),tolower(paste0(KE_KEY,k1)),NA),
+         trig = ifelse(!(is.na(dig)|is.na(k2)),tolower(paste0(dig,k2)),NA)) %>% 
   left_join(freq_letter, by = 'KE_KEY') %>% 
   left_join(freq_dig, by = 'dig') %>% 
   left_join(freq_trig, by = 'trig') %>% 
-  select(-k1,-k2, -dig, -trig)
+  select(-k1,-k2)
 
 
 # ---- 
