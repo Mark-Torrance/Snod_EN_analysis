@@ -90,8 +90,16 @@ freq_letter <- read_delim("../SnodWrite_EN/BNC_letters.txt",
 names(freq_letter) = c('KE_KEY','letter_frq','letter_cv')
 
 freq_dig <- read_delim("../SnodWrite_EN/BNC_digs.txt",
-                       "\t", escape_double = FALSE, trim_ws = F, col_names = FALSE)
-names(freq_dig) = c('dig','dig_frq','dig_cv')
+                       "\t", escape_double = FALSE, trim_ws = F, col_names = FALSE) %>% 
+  rename(dig = X1, dig_frq = X2, dig_cv = X3) %>% 
+  # get conditional probabilities
+  mutate(dig1 = str_split_fixed(dig,'', n=2)[,1]) %>% 
+  group_by(dig1) %>% 
+  mutate(dig1_frq = sum(dig_frq),
+         dig_frq_cond = dig_frq/dig1_frq) %>% 
+  ungroup() %>% 
+  arrange(dig) %>% 
+  select(-dig1, -dig1_frq)
 
 freq_trig <- read_delim("../SnodWrite_EN/BNC_trigs.txt",
                        "\t", escape_double = FALSE, trim_ws = F, col_names = FALSE)
